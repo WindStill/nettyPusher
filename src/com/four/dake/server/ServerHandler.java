@@ -61,12 +61,25 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		} else if (type.equals("chat")) {
 			JSONObject sender = recievedData.getJSONObject("user");
 			JSONObject recievedMsg = recievedData.getJSONObject("message");
-			String friendId = recievedMsg.getString("friendId");
-			recievedMsg.remove("friendId");
+			String friendId = recievedData.getString("friendId");
 			JSONObject sendingData = new JSONObject();
 			sendingData.put("sender", sender);
 			sendingData.put("type", type);
 			sendingData.put("message", recievedMsg);
+			byte[] dataByte = sendingData.toString().getBytes("UTF-8");
+			ChannelBuffer channelBuffer = ChannelBuffers.buffer(dataByte.length); 
+			channelBuffer.writeBytes(dataByte);
+			if (allChannels.containsKey(friendId)) {
+				System.out.println("sended¡­¡­");
+				Channel friendChannel = allChannels.get(friendId);
+				friendChannel.write(channelBuffer);
+			}
+		} else if (type.equals("join")){
+			JSONObject user = recievedData.getJSONObject("user");
+			String friendId = recievedData.getString("friendId");
+			JSONObject sendingData = new JSONObject();
+			sendingData.put("user", user);
+			sendingData.put("type", type);
 			byte[] dataByte = sendingData.toString().getBytes("UTF-8");
 			ChannelBuffer channelBuffer = ChannelBuffers.buffer(dataByte.length); 
 			channelBuffer.writeBytes(dataByte);
